@@ -1,0 +1,356 @@
+---
+title: "ALS_FUS_meta_analysis"
+author: "Christoph Schweingruber"
+date: "2023-03-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r libraries, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readxl)
+library(ggrepel)
+library(ggprism)
+library(ggpubr)
+library(survival)
+library(survminer)
+library(plotly)
+```
+
+
+
+```{r load_data, message=FALSE}
+# Load the aggregated data for meta analysis 
+meta <- read_excel(path = "data/FUS_ALS.xlsx", sheet = 2L)
+```
+
+
+
+```{r domains, warning=FALSE, message=FALSE}
+# FUS domain table
+FUS_domains <- tibble(
+  domain = c("QGSY-rich", "RGG1", "RRM", "RGG2", "ZnF", "RGG3", "NLS"),
+  start = c(1, 166, 286, 371, 424, 453, 506),
+  end = c(165, 267, 367, 422, 450, 501, 526),
+  domain_color = c("QGSY-rich" = "#3399CC", "RGG1" = "#666699", "RRM" = "#CC6666", "RGG2" = "#666699", "ZnF" = "#FFCC66", "RGG3" = "#666699", "NLS" = "#999933")
+)
+
+# Plot mutations over FUS domain architecture
+plt1 <- meta %>%
+  filter(., Mutation_Type %in% c("missense", "nonsense", "frameshift")) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  mutate(., cdf = stats::ecdf(Mutation_position)(Mutation_position)) %>%
+  add_row(., Mutation_position = 0, cdf = 0) %>%
+  add_row(., Mutation_position = 526, cdf = 1)
+
+plt1 <- ggplot(data = plt1, mapping = aes(x = Mutation_position)) +
+  
+    ## Domain annotation
+    geom_line(data = tibble(x = c(1, 526), y = c(-0.1, -0.1)), mapping = aes(x = x, y = y), inherit.aes = FALSE) +
+    geom_rect(
+      data = FUS_domains,
+      mapping = aes(xmin = start, xmax = end, ymin = -0.08, ymax = -0.12, fill = domain),
+      color = "black",
+      inherit.aes = FALSE,
+      show.legend = FALSE
+    ) +
+    geom_text(data = FUS_domains, mapping = aes(x = 0.5*(start + end), y = -0.1, label = domain), size = 2, color = "white") +
+    scale_fill_manual(values = FUS_domains$domain_color) +
+    
+    ## Annotate distribution
+    geom_hline(yintercept = 0.15, linetype = "dashed", color = "grey") +
+    annotate(geom = "text", x = 10, y = 0.22, label = "85%", color = "grey") +
+    annotate(geom = "text", x = 10, y = 0.08, label = "15%", color = "grey") +
+    
+    ## Cumulative Fraction of ALS cases
+    geom_step(data = plt1, mapping = aes(y = cdf), color = "black") +
+    geom_rug(
+      data = drop_na(plt1, Mutation_Type),
+      mapping = aes(
+        x = Mutation_position,
+        color = forcats::fct_relevel(
+          .f = Mutation_Type,
+          c("missense", "nonsense", "frameshift")
+        )
+      ),
+      alpha = 0.2,
+      inherit.aes = FALSE
+    ) +
+    
+    ## Labels, Ticks, and themes
+    scale_y_continuous(limits = c(-0.15, 1)) +
+    scale_x_continuous(limits = c(0, 526), breaks = c(seq(0, 500, 100), 526), labels = c(seq(0, 400, 100), "", 526)) +
+    labs(x = "Position of mutation in FUS", y = "Cumulative fraction of ALS cases", fill = "Mutation") +
+    theme_prism()
+
+plt1
+ggplotly(hide_legend(plt1))
+```
+
+
+```{r onset_endpoint, warning=FALSE, message=FALSE}
+# Age of onset
+plt2 <- meta %>%
+  filter(., !is.na(Mutation_protein)) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  ggplot(., aes(x = Age_of_onset, color = fct_lump_min(f = Mutation_protein, min = 10))) +
+    geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey") +
+    geom_hline(yintercept = 1, linetype = "dashed", color = "grey") +
+    stat_ecdf(geom = "step") +
+    geom_rug(alpha = 0.5) +
+    labs(x = "Age at onset in years", y = "Cumulative fraction", color = "FUS mutation") +
+    scale_x_continuous(limits = c(0,80), breaks = seq(from = 0, to = 80, by = 10)) +
+    theme_prism()
+
+# Duraton until endpoint (respiratory support or death)
+
+## ... in months
+plt3 <- meta %>%
+  filter(., !is.na(Mutation_protein)) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  ggplot(data = ., mapping = aes(x = Duration_in_months, color = fct_lump_min(f = Mutation_protein, min = 10))) +
+    geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey") +
+    geom_hline(yintercept = 1, linetype = "dashed", color = "grey") +
+    geom_step(aes(y = 1 - ..y..), stat = "ecdf")  +
+    geom_rug(alpha = 0.5) +
+    labs(x = "Duration until endpoint in months", y = "Cumulative fraction", color = "FUS mutation") +
+    scale_x_continuous(breaks = seq(from = 0, to = 216, by = 24)) +
+    theme_prism()
+
+## ... in years
+plt3b <- meta %>%
+  filter(., !is.na(Mutation_protein)) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  ggplot(data = ., mapping = aes(x = Duration_in_months, color = fct_lump_min(f = Mutation_protein, min = 10))) +
+    geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey") +
+    geom_hline(yintercept = 1, linetype = "dashed", color = "grey") +
+    geom_step(aes(y = 1 - ..y..), stat = "ecdf")  +
+    geom_rug(alpha = 0.5) +
+    labs(x = "Duration until endpoint in years", y = "Cumulative fraction", color = "FUS mutation") +
+    scale_x_continuous(breaks = seq(from = 0, to = 216, by = 24), labels = seq(from = 0, to = 18, by = 2)) +
+    theme_prism()
+
+## Plots
+ggarrange(plt2, plt3b, common.legend = TRUE)
+```
+
+
+```{r inheritance_onset_sex, warning=FALSE, message=FALSE}
+# Sex ratio
+## With inspiration from https://www.robertlanfear.com/blog/files/visualising_gender_balance_R.html
+
+plt4 <- meta %>%
+  filter(., !is.na(Mutation_protein)) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  mutate(., Mutation_protein = fct_lump_min(Mutation_protein, min = 10)) %>%
+  ggplot(data = ., mapping = aes(x = Mutation_protein, fill = Sex)) +
+    geom_bar(data = . %>% filter(., Sex == "M"), aes(color = Sex), fill = NA, linetype = "dashed", show.legend = FALSE) +
+    geom_bar(data = . %>% filter(., Sex == "F"), color = "black") +
+    geom_bar(data = . %>% filter(., Sex == "F"), aes(y =..count..*(-1), color = Sex), fill = NA, linetype = "dashed", show.legend = FALSE) +
+    geom_bar(data = . %>% filter(., Sex == "M"), color = "black", aes(y =..count..*(-1))) +
+    labs(x = "Mutations", y = "Cases", color = "FUS mutation") +
+    scale_y_continuous(limits = c(-120, 120), breaks = seq(-120, 120, 30), labels = abs(seq(-120, 120, 30))) + 
+    scale_x_discrete(limits = rev) +
+    scale_fill_manual(values = c("#D55E00", "#0072B2")) +
+    scale_color_manual(values = c("#D55E00", "#0072B2")) +
+    guides(color = FALSE) +
+    coord_flip() +
+    theme_prism()
+plt4
+
+# Pie charts
+## Theme, http://www.sthda.com/english/wiki/ggplot2-pie-chart-quick-start-guide-r-software-and-data-visualization
+## https://ggplot2.tidyverse.org/reference/position_stack.html
+
+blank_theme <- theme_minimal()+
+  theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  plot.title=element_text(size=14, face="bold")
+)
+
+# Inheritance pies
+plt5 <- meta %>%
+  filter(., !is.na(Mutation_protein), !(is.na(Inheritance))) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  mutate(., Mutation_protein = fct_lump_min(Mutation_protein, min = 10)) %>%
+  group_by(., Mutation_protein, Inheritance) %>%
+  summarise(., cases = n()) %>%
+  ungroup(.) %>%
+  ggplot(data = ., mapping = aes(x = "", y = cases, fill = Inheritance)) +
+    facet_wrap(~ Mutation_protein, nrow = 1) +
+    geom_col(position = "fill", color = "black") +
+    geom_text(aes(label = cases), color = "white", size = 3, position = position_fill(vjust = .5)) +
+    coord_polar("y", start=0) +
+    scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
+    blank_theme +
+    theme(axis.text.x=element_blank())
+plt5
+
+# Onset site pies
+plt6 <- meta %>%
+  mutate(
+    .,
+    Onset_site = case_when(
+      str_detect(Onset, "Limb") ~ "spinal",
+      str_detect(Onset, "Neck") ~ "spinal",
+      str_detect(Onset, "Bulbar") ~ "bulbar",
+      TRUE ~ Onset
+    )
+  ) %>%
+  filter(., !is.na(Mutation_protein), Onset_site %in% c("spinal", "bulbar")) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  mutate(., Mutation_protein = fct_lump_min(Mutation_protein, min = 10)) %>%
+  group_by(., Mutation_protein, Onset_site) %>%
+  summarise(., cases = n()) %>%
+  ungroup(.) %>%
+  ggplot(data = ., mapping = aes(x = "", y = cases, fill = Onset_site)) +
+    facet_wrap(~ Mutation_protein, nrow = 1) +
+    geom_col(position = "fill", color = "black") +
+    geom_text(aes(label = cases), color = "white", size = 3, position = position_fill(vjust = .5)) +
+    coord_polar("y", start=0) +
+    scale_fill_manual(values = c("#882255", "#44AA99")) +
+    blank_theme +
+    theme(axis.text.x=element_blank())
+plt6
+```
+
+
+```{r figure, message=FALSE, warning=FALSE}
+# Figure layout
+
+lyt <- ggarrange(
+  plt1,
+  ggarrange(
+    ggarrange(
+      plt2,
+      ggarrange(
+        plt5,
+        plt6,
+        nrow = 2, ncol = 1,
+        labels = c("d", "e")
+      ),
+      nrow = 1, ncol = 2,
+      labels = "b"
+    ),
+    ggarrange(
+      plt3,
+      plt4,
+      nrow = 1, ncol = 2,
+      labels = c("c", "f")
+    ),
+    nrow = 2, ncol = 1
+  ),
+  labels = c("a"),
+  nrow = 2, ncol = 1
+)
+```
+
+
+```{r summary_stats, warning=FALSE}
+# Summary statistics
+meta %>%
+  filter(., !is.na(Mutation_protein)) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  mutate(., Mutation_protein = fct_lump_min(Mutation_protein, min = 10)) %>%
+  group_by(., Mutation_protein) %>%
+  summarize(
+    .,
+    Cases = n(),
+    Age_of_onset_mean = mean(Age_of_onset, na.rm = TRUE),
+    Age_of_onset_sd = sd(Age_of_onset, na.rm = TRUE),
+    Age_of_onset_med = median(Age_of_onset, na.rm = TRUE),
+    Duration_in_months_mean = mean(Duration_in_months, na.rm = TRUE),
+    Duration_in_months_sd = sd(Duration_in_months, na.rm = TRUE),
+    Duration_in_months_med = median(Duration_in_months, na.rm = TRUE)
+  )
+```
+
+
+# Survival analysis
+
+```{r onset_survstats, warning=FALSE}
+## Onset
+fusals <- meta %>%
+  filter(., Mutation_Type %in% c("missense", "nonsense", "frameshift")) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  mutate(., Mutation_protein = fct_lump_min(Mutation_protein, min = 10)) %>%
+  mutate(
+    status = case_when(
+      is.na(Asymptomatic_carrier_age_in_years) ~ 2,
+      TRUE ~ 1
+    ),
+    time = case_when(
+      status == 1 ~ Asymptomatic_carrier_age_in_years,
+      status == 2 ~ Age_of_onset,
+      TRUE ~ 0
+    )
+  ) %>%
+  filter(., !is.na(time))
+
+
+fit <- survfit(Surv(time, status) ~ Mutation_protein, data = fusals)
+#summary(fit)
+
+ggsurvplot(
+  fit = fit,
+  pval = TRUE,
+  conf.int = TRUE,
+  linetype = "strata", # Change line type by groups
+  surv.median.line = "hv", # Specify median survival
+  fun = "event"
+) +
+  labs(x = "Age of onset in years")
+
+## Log-Rank test comparing survival curves: survdiff()
+surv_diff <- survdiff(Surv(time, status) ~ Mutation_protein, data = fusals)
+surv_diff
+```
+
+
+```{r endpoint_survstats, warning=FALSE}
+## Duration to endpoint
+fusals <- meta %>%
+  filter(., Mutation_Type %in% c("missense", "nonsense", "frameshift")) %>%
+  filter(., Gene == "FUS", str_detect(Disease, "ALS")) %>%
+  mutate(., Mutation_protein = fct_lump_min(Mutation_protein, min = 10)) %>%
+  mutate(
+    status = case_when(
+      is.na(Alive_in_months) ~ 2,
+      TRUE ~ 1
+    ),
+    time = case_when(
+      status == 1 ~ Alive_in_months,
+      status == 2 ~ Duration_in_months,
+      TRUE ~ 0
+    )
+  ) %>%
+  filter(., !is.na(time))
+
+
+fit <- survfit(Surv(time, status) ~ Mutation_protein, data = fusals)
+#summary(fit)
+
+ggsurvplot(
+  fit = fit,
+  pval = TRUE,
+  conf.int = TRUE,
+  linetype = "strata", # Change line type by groups
+  surv.median.line = "hv" # Specify median survival
+) +
+  labs(x = "Duration until endpoint in moths")
+
+## Log-Rank test comparing survival curves: survdiff()
+surv_diff <- survdiff(Surv(time, status) ~ Mutation_protein, data = fusals)
+surv_diff
+```
+
+
