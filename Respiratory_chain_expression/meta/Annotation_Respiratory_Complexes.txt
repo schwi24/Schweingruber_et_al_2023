@@ -1,0 +1,257 @@
+'5lc5'
+1, chain A, chain A, MT-ND3
+2, chain B, chain B, NDUFS7
+3, chain C, chain C, NDUFS3
+4, chain D, chain D, NDUFS2
+5, chain E, chain E, NDUFV2
+6, chain F, chain F, NDUFV1
+7, chain G, chain G, NDUFS1
+8, chain H, chain H, MT-ND1
+9, chain I, chain I, NDUFS8
+10, chain J, chain J, MT-ND6
+11, chain K, chain K, MT-ND4
+12, chain L, chain L, MT-ND5
+13, chain M, chain M, MT-ND4
+14, chain N, chain N, MT-ND2
+15, chain O, chain O, NDUFA10
+16, chain P, chain P, NDUFA9
+17, chain Q, chain Q, NDUFS4
+18, chain R, chain R, NDUFS6
+19, chain S, chain S, NDUFA2
+20, chain T, chain T, NDUFAB1
+21, chain U, chain U, NDUFAB1
+22, chain V, chain V, NDUFA5
+23, chain W, chain W, NDUFA6
+24, chain X, chain X, NDUFA8
+25, chain Y, chain Y, NDUFA11
+26, chain Z, chain Z, NDUFA13
+27, chain AA, chain a, NDUFA1
+28, chain BA, chain b, NDUFA3
+29, chain CA, chain c, NDUFC1
+30, chain DA, chain d, NDUFC2
+31, chain EA, chain e, NDUFS5
+32, chain FA, chain f, NDUFB1
+33, chain GA, chain g, NDUFB11
+34, chain HA, chain h, NDUFB5
+35, chain IA, chain i, NDUFB6
+36, chain JA, chain j, NDUFB2
+37, chain KA, chain k, NDUFB3
+38, chain LA, chain l, NDUFB8
+39, chain MA, chain m, NDUFB4
+40, chain NA, chain n, NDUFB9
+41, chain OA, chain o, NDUFB7
+42, chain PA, chain p, NDUFB10
+43, chain QA, chain q, NDUFA12
+44, chain RA, chain r, NDUFA7
+45, chain SA, chain s, NDUFV3
+NAP, chain CB, chain P residue NAP, nadp nicotinamide-adenine dinucleotide phosphate
+FMN, chain VA, chain F residue FMN, flavin mononucleotide
+SF4, chain AB, chain I residue SF4, Fe4-S4 iron-sulfur cluster
+SF4, chain BB, chain I residue SF4, Fe4-S4 iron-sulfur cluster
+SF4, chain TA, chain B residue SF4, Fe4-S4 iron-sulfur cluster
+SF4, chain WA, chain F residue SF4, Fe4-S4 iron-sulfur cluster
+SF4, chain XA, chain G residue SF4, Fe4-S4 iron-sulfur cluster
+SF4, chain YA, chain G residue SF4, Fe4-S4 iron-sulfur cluster
+FES, chain UA, chain E residue FES, Fe2-S2 iron-sulfur cluster
+FES, chain ZA, chain G residue FES, Fe2-S2 iron sulfur cluster
+ZN, chain DB, chain R residue ZN, Zinc ion
+
+
+'1zoy'
+1, chain A, chain A, SDHA
+2, chain B, chain B, SDHB
+3, chain C, chain C, SDHC
+4, chain D, chain D, SDHD
+FAD, chain E, chain A residue FAD, flavin-adenine dinucleotide
+EPH, chain K, chain D residue EPH, l-alpha-phosphatidyl-beta-oleoyl-gamma-palmitoyl-phosphatidylethanolamine
+EPH, chain L, chain D residue EPH, l-alpha-phosphatidyl-beta-oleoyl-gamma-palmitoyl-phosphatidylethanolamine
+HEM, chain J, chain C residue HEM, protoporphyrin IX containing Fe
+SF4, chain G, chain B residue SF4, Fe4-S4 iron-sulfur cluster
+F3S, chain H, chain B residue F3S, Fe3-S4 iron-sulfur cluster
+UQ1, chain I, chain B residue UQ1, ubiquinone
+FES, chain F, chain B residue FES, Fe2-S2 iron sulfur cluster
+
+
+'1bgy'
+1, chain A, chain A, UQCRC1
+1, chain L, chain M, UQCRC1
+2, chain B, chain B, UQCRC2
+2, chain M, chain N, UQCRC2
+3, chain C, chain C, MT-CYB
+3, chain N, chain O, MT-CYB
+4, chain D, chain D, CYC1
+4, chain O, chain P, CYC1
+5, chain E, chain E, UQCRFS1
+5, chain P, chain Q, UQCRFS1
+6, chain F, chain F, UQCRB
+6, chain Q, chain R, UQCRB
+7, chain G, chain G, UQCRQ
+7, chain R, chain S, UQCRQ
+8, chain H, chain H, UQCRH
+8, chain S, chain T, UQCRH
+9, chain I, chain I, UQCRFS1
+9, chain T, chain U, UQCRFS1
+10, chain J, chain J, UQCR10
+10, chain U, chain V, UQCR10
+11, chain K, chain K, UQCR11
+11, chain V, chain W, UQCR11
+HEC, chain BA, chain P residue HEC, heme c
+HEC, chain Y, chain D residue HEC, heme c
+HEM, chain AA, chain O residue HEM, protoporphyrin IX containing Fe
+HEM, chain W, chain C residue HEM, protoporphyrin IX containing Fe
+HEM, chain X, chain C residue HEM, protoporphyrin IX containing Fe
+HEM, chain Z, chain O residue HEM, protoporphyrin IX containing Fe
+FES, chain CA, chain Q residue FES, Fe2-S2 iron-sulfur cluster
+
+'1occ'
+1, chain A, chain A, MT-CO1
+1, chain N, chain N, MT-C01
+2, chain B, chain B, MT-CO2
+2, chain O, chain O, MT-CO2
+3, chain C, chain C, MT-CO3
+3, chain P, chain P, MT-CO3
+4, chain D, chain D, COX4I1
+4, chain Q, chain Q, COX4I1
+5, chain E, chain E, COX5A
+5, chain R, chain R, COX5A
+6, chain F, chain F, COX5B
+6, chain S, chain S, COX5B
+7, chain G, chain G, COX6A2
+7, chain T, chain T, COX6A2
+8, chain H, chain H, COX6B1
+8, chain U, chain U, COX6B1
+9, chain I, chain I, COX6C
+9, chain V, chain V, COX6C
+10, chain J, chain J, COX7A1
+10, chain W, chain W, COX7A1
+11, chain K, chain K, COX7B
+11, chain X, chain X, COX7B
+12, chain L, chain L, COX7C
+12, chain Y, chain Y, COX7C
+13, chain M, chain M, COX8B
+13, chain Z, chain Z, COX8B
+HEA, chain CA, chain A residue HEA, heme a
+HEA, chain DA, chain A residue HEA, heme a
+HEA, chain JA, chain N residue HEA, heme a
+HEA, chain KA, chain N residue HEA, heme a
+ZN, chain GA, chain F residue ZN, zinc ion
+ZN, chain NA, chain S residue ZN, zinc ion
+CU, chain AA, chain A residue CU, copper(II) ion
+CU, chain EA, chain Bresidue CU, copper(II) ion
+CU, chain FA, chain B residue CU, copper(II) ion
+CU, chain HA, chain N residue CU, copper(II) ion
+CU, chain LA, chain O residue CU, copper(II) ion
+CU, chain MA, chain O residue CU, copper(II) ion
+MG, chain BA, chain A residue MG, magnesium ion
+MG, chain IA, chain N residue MG, magnesium ion
+
+'5ara'
+1, chain A, chain A, ATP5F1A
+1, chain B, chain B, ATP5F1A
+1, chain C, chain C, ATP5F1A
+2, chain D, chain D, ATP5F1B
+2, chain E, chain E, ATP5F1B
+2, chain F, chain F, ATP5F1B
+3, chain G, chain G, ATP5F1C
+4, chain H, chain H, ATP5F1D,
+5, chain I, chain I, ATP5F1E,
+6, chain J, chain J, ATP5MC1
+6, chain K, chain K, ATP5MC1
+6, chain L, chain L, ATP5MC1
+6, chain M, chain M, ATP5MC1
+6, chain N, chain N, ATP5MC1
+6, chain O, chain O, ATP5MC1
+6, chain P, chain P, ATP5MC1
+6, chain Q, chain Q, ATP5MC1
+7, chain R, chain S, ATP5PO
+8, chain S, chain T, ATP5PB
+9, chain T, chain U, ATP5PD
+10, chain U, chain V, ATP5PF
+11, chain V, chain W, MT-ATP6
+
+
+'5luf'
+1, chain A, UQCRC1
+1, chain L, UQCRC1
+2, chain B, UQCRC2
+2, chain M, UQCRC2
+3, chain C, MT-CYB
+3, chain N, MT-CYB
+4, chain D, CYC1
+4, chain O, CYC1
+5, chain E, UQCRFS1
+5, chain P, UQCRFS1
+6, chain F, UQCRB
+6, chain Q, UQCRB
+7, chain G, UQCRQ
+7, chain R, UQCRQ
+8, chain H, UQCRH
+8, chain S, UQCRH
+9, chain I, UQCRFS1
+9, chain T, UQCRFS1
+10, chain J, UQCR10
+10, chain U, UQCR10
+11, chain K, UQCR11
+11, chain V, UQCR11
+12, chain W, MT-CO1
+13, chain X, MT-CO2
+14, chain Y, MT-CO3
+15, chain Z, COX4I1
+16, chain AA, COX5A
+17, chain BA, COX5B
+18, chain CA, COX6A2
+19, chain DA, COX6B1
+20, chain EA, COX6C
+21, chain FA, COX7A1
+22, chain GA, COX7B
+23, chain HA, COX7C
+24, chain IA, COX8B
+25, chain JA, complex I?
+26, chain KA, complex I?
+27, chain LA, complex I?
+28, chain MA, complex I?
+29, chain NA, complex I?
+30, chain OA, complex I?
+31, chain PA, complex I?
+32, chain QA, complex I?
+33, chain RA, complex I?
+34, chain SA, complex I?
+35, chain TA, complex I?
+36, chain UA, complex I?
+37, chain VA, complex I?
+38, chain WA, complex I?
+39, chain XA, complex I?
+40, chain YA, complex I?
+41, chain ZA, complex I?
+42, chain AB, complex I?
+43, chain BB, complex I?
+44, chain CB, complex I?
+45, chain DB, complex I?
+46, chain EB, complex I?
+47, chain FB, complex I?
+48, chain GB, complex I?
+49, chain HB, complex I?
+50, chain IB, complex I?
+51, chain JB, complex I?
+HEA, chain TB, heme a
+HEA, chain UB, heme a
+HEC, chain MB, heme c
+HEC, chain PB, heme c
+HEM, chain KB, protoporphyrin IX containing Fe
+HEM, chain LB, protoporphyrin IX containing Fe
+HEM, chain NB, protoporphyrin IX containing Fe
+HEM, chain OB, protoporphyrin IX containing Fe
+SF4, chain AC, Fe4-S4 iron-sulfur cluster
+SF4, chain BC, Fe4-S4 iron-sulfur cluster
+SF4, chain CC, Fe4-S4 iron-sulfur cluster
+SF4, chain EC, Fe4-S4 iron-sulfur cluster
+SF4, chain FC, Fe4-S4 iron-sulfur cluster
+SF4, chain YB, Fe4-S4 iron-sulfur cluster
+FES, chain DC, Fe2-S2 iron-sulfur cluster
+FES, chain QB, Fe2-S2 iron-sulfur cluster
+FES, chain ZB, Fe2-S2 iron-sulfur cluster
+ZN, chain XB, zinc ion
+CU, chain RB, copper(II) ion
+CU, chain VB, copper(II) ion
+CU, chain WB, copper(II) ion
+MG, chain SB, magnesium ion

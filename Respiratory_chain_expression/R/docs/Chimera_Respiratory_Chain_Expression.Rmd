@@ -1,0 +1,207 @@
+---
+title: "Chimera_Respiratory_Chain_Expression"
+author: "Christoph Schweingruber"
+date: "2023-03-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+library(RColorBrewer)
+```
+
+
+
+```{r expression_data}
+## Collect expression data
+
+## File paths
+filepaths <- list.files(
+  path = "data/DESeq2",
+  pattern = "_MN_DESeq2.xlsx",
+  all.files = FALSE,
+  full.names = TRUE,
+  recursive = TRUE,
+  ignore.case = FALSE,
+  include.dirs = FALSE,
+  no.. = FALSE
+)
+
+## Readers
+read_plus <- function(filepath){
+  # Small helper for keeping filepaths and names
+  read_excel(path = filepath) %>%
+    mutate(., Path = basename(filepath))
+}
+map_df_progress <- function(.x, .f, ..., .id = NULL) {
+  # From https://www.jamesatkins.net/posts/progress-bar-in-purrr-map-df/
+  .f <- purrr::as_mapper(.f, ...)
+  pb <- progress::progress_bar$new(total = length(.x), force = TRUE)
+  
+  f <- function(...) {
+    pb$tick()
+    .f(...)
+  }
+  purrr::map_df(.x, f, ..., .id = .id)
+}
+
+## Read in the data, filter ALS lines, and clean up
+data <- filepaths %>%
+  map_df_progress(~ read_plus(.)) %>%
+  rename(., gene = 1) %>%
+  filter(
+    .,
+    str_detect(Path, "FUS_R495X") | 
+      str_detect(Path, "FUS_P525L") | 
+      str_detect(Path, "TARDBP_M337V")
+  ) %>%
+  mutate(
+    .,
+    Cell_line = case_when(
+      str_detect(Path, "FUS_R495X") ~ "FUS_R495X",
+      str_detect(Path, "FUS_P525Lhe") ~ "FUS_P525L_heteroz",
+      str_detect(Path, "FUS_P525Lho") ~ "FUS_P525L_homoz",
+      str_detect(Path, "TARDBP_M337V") ~ "TARDBP_M337V",
+      TRUE ~ Path
+    )
+  )
+
+## Summerize expression data to average log2 foldchange and min padj
+sumdata <- data %>%
+  group_by(., gene) %>%
+  summarise(
+    .,
+    avg_log2fc = mean(log2FoldChange, na.rm = TRUE),
+    min_padj = min(padj)
+  )
+```
+
+
+
+```{r}
+## PDB annotations
+pdb <- read_excel(path = "data/PDB_Mitochondrial_Respiratory_Complexes.xlsx")
+pdb
+```
+
+
+
+```{r color_by_expression}
+## Assign color scale to the average log2 foldchange
+
+## Colors
+colfunc <- colorRamp(c('blue', "grey90", 'red'))
+
+## Append expression summary to the PDB annotations, 
+## then add color scale and complex ID
+sumpdb <- left_join(pdb, sumdata, by = c("gene" = "gene")) %>%
+  mutate(
+    .,
+    col = 0.5 * (avg_log2fc / max(abs(avg_log2fc), na.rm = TRUE)) + 0.5, ## scale [0-1]
+    col = colourvalues::convert_colours(colfunc(col)),
+    complex = case_when(
+      str_detect(pdb_id, "5lc5") ~ "#0",
+      str_detect(pdb_id, "1zoy") ~ "#1",
+      str_detect(pdb_id, "1bgy") ~ "#2",
+      str_detect(pdb_id, "1occ") ~ "#3",
+      str_detect(pdb_id, "5ara") ~ "#4",
+      TRUE ~ ""
+    )
+  ) %>%
+  filter(., col != "#000000") ## remove proteins whose expression was not found
+
+sumpdb
+```
+
+
+
+```{r chimera_script}
+## Write up a python script to color the protein chains in Chimera
+
+## Paste commands
+output <- sumpdb %>%
+  filter(., is.na(small_molecule)) %>%
+  transmute(
+    .,
+    script = paste0(
+      "runCommand('select ",
+      complex,
+      ":*.",
+      str_replace(auth_chain, "chain ", ""),
+      "'); runCommand('color ",
+      col,
+      " sel'); runCommand('~select')"
+    )
+  ) %>% pull(.)
+
+output <- c(
+  "import chimera",
+  "from chimera import runCommand",
+  "",
+  as.vector(output)
+)
+
+## Write the script to a file
+write_delim(
+  x = as.data.frame(output),
+  file = "docs/color_respiratory_chain_by_expression.py",
+  col_names = FALSE,
+  quote = "none"
+)
+```
+
+
+
+```{r legend}
+## Scale legend
+mn <- min(sumpdb$avg_log2fc, na.rm = TRUE)
+mx <- max(sumpdb$avg_log2fc, na.rm = TRUE)
+lm <- max(abs(c(mn,mx)))
+
+df <- tibble(avg_log2fc = seq(from = -lm, to = lm, length.out = 10000)) %>%
+  mutate(
+    .,
+    col = 0.5 * (avg_log2fc/lm) + 0.5, ## scale [0-1]
+    col = colourvalues::convert_colours(colfunc(col))
+  )
+lgnd <- df %>%
+  filter(., avg_log2fc >= mn, avg_log2fc <= mx) %>%
+  ggplot(., aes(x = avg_log2fc, y = 1, fill = as.factor(avg_log2fc))) +
+    geom_tile() +
+    geom_tile(aes(x = (mn + mx)/2, y = 1, width = (mx - mn)), color = "black", alpha = 0) +
+    scale_fill_manual(values = df$col) +
+    theme(
+      legend.position = "none",
+      
+      # Plot background
+      plot.background = element_blank(),
+      
+      # Change axis line
+      axis.line.x = element_line(colour = "black"),
+      
+      # Remove y-axis
+      axis.title.y = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank(),
+      
+      # Remove background grid
+      panel.background = element_blank(),
+      panel.border = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+    )
+lgnd
+```
+
+
+
+```{r dysregulated_genes}
+## Dysregulated mitochondrial genes
+mtgenes <- read_csv(file = "data/Mitochondrial_Respiration.csv")
+data %>%
+  filter(., gene %in% mtgenes$Gene) %>%
+  filter(., padj < 0.001)
+```
+
